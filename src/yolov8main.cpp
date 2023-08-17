@@ -26,44 +26,45 @@
 #include <iostream>
 YoloV8 yolov8;
 int target_size = 640; // 416; //320;  must be divisible by 32.
-
-// int main(int argc, char **argv)
-// {
-//     const char *imagepath = argv[1];
-
-//     if (argc != 2)
-//     {
-//         fprintf(stderr, "Usage: %s [imagepath]\n", argv[0]);
-//         return -1;
-//     }
-
-//     cv::Mat m = cv::imread(imagepath, 1);
-//     if (m.empty())
-//     {
-//         fprintf(stderr, "cv::imread %s failed\n", imagepath);
-//         return -1;
-//     }
-
-//     yolov8.load(target_size); // load model (once) see yoloyV8.cpp line 246
-
-//     std::vector<Object> objects;
-//     yolov8.detect(m, objects); // recognize the objects
-//     yolov8.draw(m, objects);   // show the outcome
-
-//     cv::imshow("RPi4 - 1.95 GHz - 2 GB ram", m);
-//     //    cv::imwrite("out.jpg",m);
-//     cv::waitKey(0);
-
-//     return 0;
-// }
+/*
 int main(int argc, char **argv)
 {
-    const char *type = argv[1];
-    const char *filepath = argv[2];
-    const char *modelpath = argv[3];
+    const char *imagepath = argv[1];
+
+    if (argc != 2)
+    {
+        fprintf(stderr, "Usage: %s [imagepath]\n", argv[0]);
+        return -1;
+    }
+
+    cv::Mat m = cv::imread(imagepath, 1);
+    if (m.empty())
+    {
+        fprintf(stderr, "cv::imread %s failed\n", imagepath);
+        return -1;
+    }
+
+    yolov8.load(target_size); // load model (once) see yoloyV8.cpp line 246
+
+    std::vector<Object> objects;
+    yolov8.detect(m, objects); // recognize the objects
+    yolov8.draw(m, objects);   // show the outcome
+
+    cv::imshow("RPi4 - 1.95 GHz - 2 GB ram", m);
+    //    cv::imwrite("out.jpg",m);
+    cv::waitKey(0);
+
+    return 0;
+}
+*/
+int main(int argc, char **argv)
+{
+    const char *type = argv[1];      // input type
+    const char *filepath = argv[2];  // file path
+    const char *modelpath = argv[3]; // model path
     if (argc != 4)
     {
-        fprintf(stderr, "Usage: %s [img/video] [filepath] [modelpath]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [img/video] [filepath] [modelpath]\n", argv[0]); // err: bad param number
         return -1;
     }
     std::string type_s(type);
@@ -72,7 +73,7 @@ int main(int argc, char **argv)
         cv::Mat m = cv::imread(filepath, 1);
         if (m.empty())
         {
-            fprintf(stderr, "cv::imread %s failed\n", filepath);
+            fprintf(stderr, "cv::imread %s failed\n", filepath); // err: bad filepath
             return -1;
         }
 
@@ -80,10 +81,10 @@ int main(int argc, char **argv)
 
         std::vector<Object> objects;
         yolov8.detect(m, objects); // recognize the objects
-        yolov8.draw(m, objects);   // show the outcome
+        yolov8.draw(m, objects);   //  draw boxes
 
-        cv::imshow("result", m);
-        //    cv::imwrite("out.jpg",m);
+        cv::imshow("result", m);                    // show the outcome
+        cv::imwrite("../output/img/output.jpg", m); // save outputimg under ../output/img/
         cv::waitKey(0);
     }
     else if (type_s == "video")
@@ -91,7 +92,7 @@ int main(int argc, char **argv)
         cv::VideoCapture video = cv::VideoCapture(filepath);
         if (!video.isOpened())
         {
-            printf("cv::VideoCapture %s failed\n", filepath);
+            printf("cv::VideoCapture %s failed\n", filepath); // err: bad file path
             return -1;
         }
         int w = video.get(cv::CAP_PROP_FRAME_WIDTH);      // frame width
@@ -99,7 +100,7 @@ int main(int argc, char **argv)
         int tf = video.get(cv::CAP_PROP_FRAME_COUNT);     // total frame
         int fps = video.get(cv::CAP_PROP_FPS);            // fps
         yolov8.load(target_size, std::string(modelpath)); // load model (once) see yoloyV8.cpp line 246
-        std::string outputpath = "../output/outputvideo.mp4";
+        std::string outputpath = "../output/video/outputvideo.mp4";
         cv::VideoWriter videoWriter(outputpath.c_str(), cv::VideoWriter::fourcc('m', 'p', '4', 'v'), fps, cv::Size(w, h));
         cv::Mat m;
         while (true)
@@ -108,10 +109,9 @@ int main(int argc, char **argv)
             if (m.empty())
                 break;
             std::vector<Object> objects;
-            yolov8.detect(m, objects); // recognize the objects
-            yolov8.draw(m, objects);   // show the outcome
-            // std::cout << m.size() << std::endl;
-            videoWriter.write(m.clone());
+            yolov8.detect(m, objects);    // recognize the objects
+            yolov8.draw(m, objects);      // show the outcome
+            videoWriter.write(m.clone()); // save output video under ../output/video/
             cv::imshow("result", m);
             cv::waitKey(20);
         }
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        fprintf(stderr, "wrong input type\nUsage [img/video]\n");
+        fprintf(stderr, "wrong input type\nUsage [img/video]\n"); // err: bad params
         return -1;
     }
 

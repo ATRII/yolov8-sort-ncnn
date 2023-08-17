@@ -375,7 +375,7 @@ int YoloV8::draw(cv::Mat &rgb, const std::vector<Object> &objects)
     for (size_t i = 0; i < objects.size(); i++)
     {
         const Object &obj = objects[i];
-        // TODO: EDITED, filter except man and car
+        // EDITED: filter except man and car
         if (obj.label > 7)
             continue;
         //         fprintf(stderr, "%d = %.5f at %.2f %.2f %.2f x %.2f\n", obj.label, obj.prob,
