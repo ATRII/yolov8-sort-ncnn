@@ -92,7 +92,7 @@ int main(int argc, char **argv)
         cv::VideoCapture video = cv::VideoCapture(filepath);
         if (!video.isOpened())
         {
-            printf("cv::VideoCapture %s failed\n", filepath); // err: bad file path
+            fprintf(stderr, "cv::VideoCapture %s failed\n", filepath); // err: bad file path
             return -1;
         }
         int w = video.get(cv::CAP_PROP_FRAME_WIDTH);      // frame width
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        fprintf(stderr, "wrong input type\nUsage [img/video]\n"); // err: bad params
+        fprintf(stderr, "wrong input type\nUsage: [img|video]\n"); // err: bad params
         return -1;
     }
 

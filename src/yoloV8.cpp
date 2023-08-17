@@ -261,7 +261,7 @@ int YoloV8::load(int _target_size, std::string _model_path)
     yolo.clear();
 
     yolo.opt = ncnn::Option();
-
+    // TODO: CHANGE threads number
     yolo.opt.num_threads = 4;
     std::string model_path_param = _model_path + std::string(".param");
     std::string model_path_bin = _model_path + std::string(".bin");
