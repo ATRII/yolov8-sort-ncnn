@@ -1,5 +1,0 @@
-/home/yh/code/myCmake/build/CMakeFiles/edit_cache.dir
-/home/yh/code/myCmake/build/CMakeFiles/rebuild_cache.dir
-/home/yh/code/myCmake/build/bin/CMakeFiles/main.dir
-/home/yh/code/myCmake/build/bin/CMakeFiles/edit_cache.dir
-/home/yh/code/myCmake/build/bin/CMakeFiles/rebuild_cache.dir
