@@ -37,15 +37,17 @@ class YoloV8
 {
 public:
     YoloV8();
-    int load(int target_size, std::string model_path);
+    int load(int target_size, std::string model_path = "../../model/yolov8s");
     int detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_threshold = 0.4f, float nms_threshold = 0.5f);
     int draw(cv::Mat &rgb, const std::vector<Object> &objects);
 
 private:
     ncnn::Net yolo;
     int target_size;
-    float mean_vals[3];
+    /*
+    float mean_vals[3]; //for what?
+    */
     float norm_vals[3];
 };
-
+std::string getfilename(std::string s);
 #endif // YOLOV8_H

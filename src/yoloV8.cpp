@@ -29,7 +29,19 @@ const char *class_names[] = {
     "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
     "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
     "hair drier", "toothbrush"};
-
+// colors corresponding to label
+// rgb(255,63,127,0.6) rgb(127,255,63,0.6) rgb(63,127,255,0.6) rgb(127,127,63,0.6) rgb(127,63,127,0.6) rgb(63,127,127,0.6) rgb(127,127,127,0.6) rgb(0,0,0,0.6)
+// bgr(127,63,255,0.6) bgr(63,255,127,0.6) bgr(255,127,63,0.6) bgr(63,127,127,0.6) bgr(127,63,127,0.6) bgr(127,127,63,0.6)
+const cv::Scalar colors[] = {
+    cv::Scalar(127, 63, 255, 0.6),
+    cv::Scalar(63, 255, 127, 0.6),
+    cv::Scalar(255, 127, 63, 0.6),
+    cv::Scalar(63, 127, 127, 0.6),
+    cv::Scalar(127, 63, 127, 0.6),
+    cv::Scalar(127, 127, 63, 0.6),
+    cv::Scalar(127, 127, 127, 0.6),
+    cv::Scalar(0, 0, 0, 0.6)};
+const cv::Scalar WHITE(255, 255, 255);
 static float fast_exp(float x)
 {
     union
@@ -235,27 +247,29 @@ static void generate_proposals(std::vector<GridAndStride> grid_strides, const nc
 YoloV8::YoloV8()
 {
 }
-// int YoloV8::load(int _target_size)
-// {
-//     yolo.clear();
+/*
+int YoloV8::load(int _target_size)
+{
+    yolo.clear();
 
-//     yolo.opt = ncnn::Option();
+    yolo.opt = ncnn::Option();
 
-//     yolo.opt.num_threads = 4;
+    yolo.opt.num_threads = 4;
 
-//     yolo.load_param("./yolov8n.param");
-//     yolo.load_model("./yolov8n.bin");
+    yolo.load_param("./yolov8n.param");
+    yolo.load_model("./yolov8n.bin");
 
-//     target_size = _target_size;
-//     mean_vals[0] = 103.53f;
-//     mean_vals[1] = 116.28f;
-//     mean_vals[2] = 123.675f;
-//     norm_vals[0] = 1.0 / 255.0f;
-//     norm_vals[1] = 1.0 / 255.0f;
-//     norm_vals[2] = 1.0 / 255.0f;
+    target_size = _target_size;
+    mean_vals[0] = 103.53f;
+    mean_vals[1] = 116.28f;
+    mean_vals[2] = 123.675f;
+    norm_vals[0] = 1.0 / 255.0f;
+    norm_vals[1] = 1.0 / 255.0f;
+    norm_vals[2] = 1.0 / 255.0f;
 
-//     return 0;
-// }
+    return 0;
+}
+*/
 int YoloV8::load(int _target_size, std::string _model_path)
 {
     yolo.clear();
@@ -269,9 +283,12 @@ int YoloV8::load(int _target_size, std::string _model_path)
     yolo.load_model(model_path_bin.c_str());
 
     target_size = _target_size;
+    // TODO: var "mean_vals" no references?deleted
+    /*
     mean_vals[0] = 103.53f;
     mean_vals[1] = 116.28f;
     mean_vals[2] = 123.675f;
+    */
     norm_vals[0] = 1.0 / 255.0f;
     norm_vals[1] = 1.0 / 255.0f;
     norm_vals[2] = 1.0 / 255.0f;
@@ -288,6 +305,7 @@ int YoloV8::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_
     int w = width;
     int h = height;
     float scale = 1.f;
+    // TODO: Modify Preprocessing(padding)
     if (w > h)
     {
         scale = (float)target_size / w;
@@ -307,8 +325,11 @@ int YoloV8::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_
     int wpad = (w + 31) / 32 * 32 - w;
     int hpad = (h + 31) / 32 * 32 - h;
     ncnn::Mat in_pad;
+    /*
     ncnn::copy_make_border(in, in_pad, hpad / 2, hpad - hpad / 2, wpad / 2, wpad - wpad / 2, ncnn::BORDER_CONSTANT, 0.f);
-
+    */
+    // CHANGEED: reserve bottom-right padding, while top-left padding removed(like yoloX)
+    ncnn::copy_make_border(in, in_pad, 0, hpad, 0, wpad, ncnn::BORDER_CONSTANT, 0.f);
     in_pad.substract_mean_normalize(0, norm_vals);
 
     ncnn::Extractor ex = yolo.create_extractor();
@@ -340,11 +361,17 @@ int YoloV8::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_
         objects[i] = proposals[picked[i]];
 
         // adjust offset to original unpadded
+        /*
         float x0 = (objects[i].rect.x - (wpad / 2)) / scale;
         float y0 = (objects[i].rect.y - (hpad / 2)) / scale;
         float x1 = (objects[i].rect.x + objects[i].rect.width - (wpad / 2)) / scale;
         float y1 = (objects[i].rect.y + objects[i].rect.height - (hpad / 2)) / scale;
-
+        */
+        // CHANGED: cause top-left padding removed, no more additional coor calcu
+        float x0 = (objects[i].rect.x) / scale;
+        float y0 = (objects[i].rect.y) / scale;
+        float x1 = (objects[i].rect.x + objects[i].rect.width) / scale;
+        float y1 = (objects[i].rect.y + objects[i].rect.height) / scale;
         // clip
         x0 = std::max(std::min(x0, (float)(width - 1)), 0.f);
         y0 = std::max(std::min(y0, (float)(height - 1)), 0.f);
@@ -381,13 +408,13 @@ int YoloV8::draw(cv::Mat &rgb, const std::vector<Object> &objects)
         //         fprintf(stderr, "%d = %.5f at %.2f %.2f %.2f x %.2f\n", obj.label, obj.prob,
         //                 obj.rect.x, obj.rect.y, obj.rect.width, obj.rect.height);
 
-        cv::rectangle(rgb, obj.rect, cv::Scalar(255, 0, 0));
-
+        // cv::rectangle(rgb, obj.rect, cv::Scalar(255, 0, 0));
+        cv::rectangle(rgb, obj.rect, colors[obj.label], 2);
         char text[256];
         sprintf(text, "%s %.1f%%", class_names[obj.label], obj.prob * 100);
 
         int baseLine = 0;
-        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.6, 1, &baseLine);
 
         int x = obj.rect.x;
         int y = obj.rect.y - label_size.height - baseLine;
@@ -396,11 +423,12 @@ int YoloV8::draw(cv::Mat &rgb, const std::vector<Object> &objects)
         if (x + label_size.width > rgb.cols)
             x = rgb.cols - label_size.width;
 
+        // cv::rectangle(rgb, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
+        //               cv::Scalar(255, 255, 255), -1);
         cv::rectangle(rgb, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-                      cv::Scalar(255, 255, 255), -1);
-
+                      colors[obj.label], -1);
         cv::putText(rgb, text, cv::Point(x, y + label_size.height),
-                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+                    cv::FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 1);
     }
 
     return 0;

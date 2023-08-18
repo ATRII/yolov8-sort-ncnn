@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
-#include <iostream>
+
 YoloV8 yolov8;
 int target_size = 640; // 416; //320;  must be divisible by 32.
 /*
@@ -57,14 +57,27 @@ int main(int argc, char **argv)
     return 0;
 }
 */
+
+std::string getfilename(std::string s)
+{
+    int l = s.length();
+    if (l == 0)
+        return s;
+    int i = l - 1;
+    for (; i >= 0; i--)
+        if (s[i] == '/')
+            break;
+    return s.substr(i + 1);
+}
+
 int main(int argc, char **argv)
 {
-    const char *type = argv[1];      // input type
-    const char *filepath = argv[2];  // file path
-    const char *modelpath = argv[3]; // model path
-    if (argc != 4)
+    const char *type = argv[1];     // input type
+    const char *filepath = argv[2]; // file path
+    // const char *modelpath = argv[3]; // model path
+    if (argc != 3 && argc != 4)
     {
-        fprintf(stderr, "Usage: %s [img/video] [filepath] [modelpath]\n", argv[0]); // err: bad param number
+        fprintf(stderr, "Usage: %s img|video filepath [modelpath]\n", argv[0]); // err: bad param number
         return -1;
     }
     std::string type_s(type);
@@ -76,15 +89,21 @@ int main(int argc, char **argv)
             fprintf(stderr, "cv::imread %s failed\n", filepath); // err: bad filepath
             return -1;
         }
-
-        yolov8.load(target_size, std::string(modelpath)); // load model (once) see yoloyV8.cpp line 246
-
+        if (argc == 4)
+        {
+            const char *modelpath = argv[3];                  // model path
+            yolov8.load(target_size, std::string(modelpath)); // load model (once) see yoloyV8.cpp line 246
+        }
+        else
+            yolov8.load(target_size);
         std::vector<Object> objects;
         yolov8.detect(m, objects); // recognize the objects
         yolov8.draw(m, objects);   //  draw boxes
 
-        cv::imshow("result", m);                    // show the outcome
-        cv::imwrite("../output/img/output.jpg", m); // save outputimg under ../output/img/
+        cv::imshow("result", m); // show the outcome
+        std::string outputpath = getfilename(filepath);
+        outputpath = "../output/img/" + outputpath;
+        cv::imwrite(outputpath, m); // save outputimg under ../output/img/
         cv::waitKey(0);
     }
     else if (type_s == "video")
@@ -95,12 +114,19 @@ int main(int argc, char **argv)
             fprintf(stderr, "cv::VideoCapture %s failed\n", filepath); // err: bad file path
             return -1;
         }
-        int w = video.get(cv::CAP_PROP_FRAME_WIDTH);      // frame width
-        int h = video.get(cv::CAP_PROP_FRAME_HEIGHT);     // frame height
-        int tf = video.get(cv::CAP_PROP_FRAME_COUNT);     // total frame
-        int fps = video.get(cv::CAP_PROP_FPS);            // fps
-        yolov8.load(target_size, std::string(modelpath)); // load model (once) see yoloyV8.cpp line 246
-        std::string outputpath = "../output/video/outputvideo.mp4";
+        int w = video.get(cv::CAP_PROP_FRAME_WIDTH);  // frame width
+        int h = video.get(cv::CAP_PROP_FRAME_HEIGHT); // frame height
+        int tf = video.get(cv::CAP_PROP_FRAME_COUNT); // total frame
+        int fps = video.get(cv::CAP_PROP_FPS);        // fps
+        if (argc == 4)
+        {
+            const char *modelpath = argv[3];                  // model path
+            yolov8.load(target_size, std::string(modelpath)); // load model (once) see yoloyV8.cpp line 246
+        }
+        else
+            yolov8.load(target_size);
+        std::string outputpath = getfilename(filepath);
+        outputpath = "../output/video/" + outputpath;
         cv::VideoWriter videoWriter(outputpath.c_str(), cv::VideoWriter::fourcc('m', 'p', '4', 'v'), fps, cv::Size(w, h));
         cv::Mat m;
         while (true)
@@ -120,6 +146,7 @@ int main(int argc, char **argv)
     }
     else
     {
+
         fprintf(stderr, "wrong input type\nUsage: [img|video]\n"); // err: bad params
         return -1;
     }
