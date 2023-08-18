@@ -1,6 +1,6 @@
-# yolov8-ncnn
+# YoloV8-ncnn
 
-## how to run
+## How to run
 run `build/bin/yolov8` for any img/video(must be .mp4) input
 ```
 cd build/bin
@@ -10,9 +10,21 @@ cd build/bin
 # for img
 ./yolov8 img ../../img/busstop.jpg ../../model/yolov8s
 ```
-## about validation/test
-run `build/test/coco/test_coco` for coco validation
+## About validation/test
+run `build/test/coco/vali_coco` for coco validation
 ```
 cd build/bin/test/coco
-./test_coco
+./vali_coco
 ```
+## Modificatoin
+### Display
+![display_1](./build/output/img/busstop.jpg)
+- only draw when detect man/car/bus/...
+- use different colors for each class of bouding box
+### Output files' saving
+- imgs under ./build/output/img
+- videos under ./build/output/video
+### Padding
+- only use bottom/right padding(like yolox)
+### Params
+argv for `./yolov8 img|video filepath [modelpathWithoutExt]`
