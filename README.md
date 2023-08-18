@@ -18,7 +18,7 @@ cd build/bin/test/coco
 ```
 ## Modificatoin
 ### Display
-![display_1](./build/output/img/busstop.jpg)
+![display_1](markdownlink/busstop.jpg)
 - only draw when detect man/car/bus/...
 - use different colors for each class of bouding box
 ### Output files' saving
