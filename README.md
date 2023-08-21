@@ -16,6 +16,12 @@ run `build/test/coco/vali_coco` for coco validation
 cd build/bin/test/coco
 ./vali_coco
 ```
+## SORT
+run `build/bin/sort` for mutil-target tracking
+```
+cd build/bin
+./sort test
+```
 ## Modificatoin
 ### Display
 ![display_1](markdownlink/busstop.jpg)

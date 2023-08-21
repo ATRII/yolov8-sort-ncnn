@@ -9,7 +9,7 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
-/img/coco/*
+data/img/coco/*
 *.json
-/build/*
-/.vscode/*
+build/*
+.vscode/*

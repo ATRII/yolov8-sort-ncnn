@@ -1,4 +1,4 @@
-#include "../../head/yoloV8.h"
+#include "../head/yoloV8.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>

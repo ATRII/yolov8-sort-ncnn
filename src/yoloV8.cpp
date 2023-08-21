@@ -402,9 +402,7 @@ int YoloV8::draw(cv::Mat &rgb, const std::vector<Object> &objects)
     for (size_t i = 0; i < objects.size(); i++)
     {
         const Object &obj = objects[i];
-        // EDITED: filter except man and car
-        if (obj.label > 7)
-            continue;
+
         //         fprintf(stderr, "%d = %.5f at %.2f %.2f %.2f x %.2f\n", obj.label, obj.prob,
         //                 obj.rect.x, obj.rect.y, obj.rect.width, obj.rect.height);
 
@@ -432,4 +430,41 @@ int YoloV8::draw(cv::Mat &rgb, const std::vector<Object> &objects)
     }
 
     return 0;
+}
+
+std::vector<Object> YoloV8::filter(const std::vector<Object> &objects, int labelthreshold)
+{
+    std::vector<Object> ans;
+    for (auto obj : objects)
+    {
+        if (obj.label > labelthreshold)
+            continue;
+        ans.push_back(obj);
+    }
+    return ans;
+}
+
+// get file name form path
+std::string getfilename(std::string path)
+{
+    int l = path.length();
+    if (l == 0)
+        return path;
+    int i = l - 1;
+    for (; i >= 0; i--)
+        if (path[i] == '/')
+            break;
+    return path.substr(i + 1);
+}
+// change file's extension name
+std::string changeext(std::string filename, const char *ext)
+{
+    int l = filename.length();
+    if (l == 0)
+        return filename;
+    int i = l - 1;
+    for (; i >= 0; i--)
+        if (filename[i] == '.')
+            break;
+    return filename.substr(0, i + 1) + std::string(ext);
 }
