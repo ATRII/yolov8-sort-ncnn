@@ -86,7 +86,7 @@ int main(int argc, char **argv)
             auto filtered = yolov8.filter(objects, 7); // filter labels
             yolov8.draw(m, filtered);                  // show the outcome
             if (fout.is_open())
-                for (auto obj : objects)
+                for (auto obj : filtered)
                     fout << cur_frame << " " << obj.rect.x << " " << obj.rect.y << " " << obj.rect.width << " " << obj.rect.height << "\n";
 
             videoWriter.write(m.clone()); // save output video under ../output/video/

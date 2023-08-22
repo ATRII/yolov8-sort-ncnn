@@ -487,3 +487,15 @@ RECT_F KalmanTracker::get_rect_xysr(float cx, float cy, float s, float r)
 
     return RECT_F(x, y, w, h);
 }
+std::string getid(int id)
+{
+    std::string s = "0000";
+    for (int i = 0; i < 4; i++)
+    {
+        if (id == 0)
+            break;
+        s[3 - i] = char(id % 10 + '0');
+        id /= 10;
+    }
+    return s;
+}

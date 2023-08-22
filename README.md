@@ -20,7 +20,7 @@ cd build/bin/test/coco
 run `build/bin/sort` for mutil-target tracking
 ```
 cd build/bin
-./sort test
+./sort test.mp4
 ```
 ## Modificatoin
 ### Display
@@ -33,4 +33,7 @@ cd build/bin
 ### Padding
 - only use bottom/right padding(like yolox)
 ### Params
+#### yolo
 argv for `./yolov8 img|video filepath [modelpathWithoutExt]`
+#### sort
+argv for `./sort filenameWithExt [modelpathWithoutExt]`

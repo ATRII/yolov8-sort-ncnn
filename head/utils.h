@@ -6,10 +6,21 @@
 #define RECT_F cv::Rect_<float>
 #define MAT_F cv::Mat_<float>
 #define KALMAN_H 2
-
+#define CNUM 8
+const cv::Scalar colors[] = {
+    cv::Scalar(127, 63, 255, 0.6),
+    cv::Scalar(63, 255, 127, 0.6),
+    cv::Scalar(255, 127, 63, 0.6),
+    cv::Scalar(63, 127, 127, 0.6),
+    cv::Scalar(127, 63, 127, 0.6),
+    cv::Scalar(127, 127, 63, 0.6),
+    cv::Scalar(127, 127, 127, 0.6),
+    cv::Scalar(0, 0, 0, 0.6)};
 class TrackingBox
 {
 public:
+    TrackingBox(){};
+    TrackingBox(int frame_, int id_, RECT_F box_) : frame(frame_), id(id_), box(box_){};
     int frame;
     int id = -1;
     RECT_F box;
@@ -58,5 +69,6 @@ private:
     std::vector<RECT_F> m_history;
 };
 
-void TestSORT(std::string seqName, bool display = true);
+std::vector<TrackingBox> SORT(std::vector<TrackingBox> detFrameData, int &total_frames_processed, double &total_time);
 double GetIOU(RECT_F bb_test, RECT_F bb_gt);
+std::string getid(int id);
