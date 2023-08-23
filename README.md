@@ -24,9 +24,12 @@ cd build/bin
 ```
 ## Modificatoin
 ### Display
+#### yolo
 ![display_1](markdownlink/busstop.jpg)
 - only draw when detect man/car/bus/...
 - use different colors for each class of bouding box
+#### sort
+![display_2](markdownlink/test.gif)
 ### Output files' saving
 - imgs under ./build/output/img
 - videos under ./build/output/video
