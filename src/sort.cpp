@@ -52,7 +52,7 @@ std::vector<TrackingBox> SORT(std::vector<TrackingBox> detCurFrameData, int &tot
         else
         {
             it = trackers.erase(it);
-            std::cerr << "Box invalid at frame: " << frame_count << std::endl;
+            // std::cerr << "Box invalid at frame: " << frame_count << std::endl;
         }
     }
 
@@ -120,12 +120,13 @@ std::vector<TrackingBox> SORT(std::vector<TrackingBox> detCurFrameData, int &tot
         trkIdx = matchedPairs[i].x;
         detIdx = matchedPairs[i].y;
         trackers[trkIdx].update(detCurFrameData[detIdx].box);
+        trackers[trkIdx].label = detCurFrameData[detIdx].label;
     }
 
     // create and initialise new trackers for unmatched detections
     for (auto umd : unmatchedDetections)
     {
-        KalmanTracker tracker = KalmanTracker(detCurFrameData[umd].box);
+        KalmanTracker tracker = KalmanTracker(detCurFrameData[umd].box, detCurFrameData[umd].label);
         trackers.push_back(tracker);
     }
 
@@ -139,12 +140,13 @@ std::vector<TrackingBox> SORT(std::vector<TrackingBox> detCurFrameData, int &tot
             res.box = (*it).get_state();
             res.id = (*it).m_id + 1;
             res.frame = frame_count;
+            // NOTE:label added here
+            res.label = (*it).label;
             frameTrackingResult.push_back(res);
             it++;
         }
         else
             it++;
-
         // remove dead tracklet
         if (it != trackers.end() && (*it).m_time_since_update > max_age)
             it = trackers.erase(it);

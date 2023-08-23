@@ -394,6 +394,17 @@ KalmanTracker::KalmanTracker(RECT_F initRect)
     m_id = kf_count;
     kf_count++;
 }
+KalmanTracker::KalmanTracker(RECT_F initRect, int label_)
+{
+    init_kf(initRect);
+    m_time_since_update = 0;
+    m_hits = 0;
+    m_hit_streak = 0;
+    m_age = 0;
+    m_id = kf_count;
+    kf_count++;
+    label = label_;
+}
 KalmanTracker::~KalmanTracker()
 {
     m_history.clear();

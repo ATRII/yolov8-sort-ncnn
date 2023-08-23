@@ -1,37 +1,9 @@
-// Tencent is pleased to support the open source community by making ncnn available.
-//
-// Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
-//
-// Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
-// in compliance with the License. You may obtain a copy of the License at
-//
-// https://opensource.org/licenses/BSD-3-Clause
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-
-// modified 1-14-2023 Q-engineering
-
-#include "../head/yoloV8.h"
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "../head/yoloV8.h"
 
-const char *class_names[] = {
-    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
-    "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
-    "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee",
-    "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard",
-    "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
-    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch",
-    "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone",
-    "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear",
-    "hair drier", "toothbrush"};
+const char *class_names[] = {"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck"};
 // colors corresponding to label
-// rgb(255,63,127,0.6) rgb(127,255,63,0.6) rgb(63,127,255,0.6) rgb(127,127,63,0.6) rgb(127,63,127,0.6) rgb(63,127,127,0.6) rgb(127,127,127,0.6) rgb(0,0,0,0.6)
-// bgr(127,63,255,0.6) bgr(63,255,127,0.6) bgr(255,127,63,0.6) bgr(63,127,127,0.6) bgr(127,63,127,0.6) bgr(127,127,63,0.6)
 const cv::Scalar colors[] = {
     cv::Scalar(127, 63, 255, 0.6),
     cv::Scalar(63, 255, 127, 0.6),
@@ -244,60 +216,36 @@ static void generate_proposals(std::vector<GridAndStride> grid_strides, const nc
     }
 }
 
-YoloV8::YoloV8()
-{
-}
-/*
-int YoloV8::load(int _target_size)
-{
-    yolo.clear();
+YoloV8::YoloV8() {}
 
-    yolo.opt = ncnn::Option();
-
-    yolo.opt.num_threads = 4;
-
-    yolo.load_param("./yolov8n.param");
-    yolo.load_model("./yolov8n.bin");
-
-    target_size = _target_size;
-    mean_vals[0] = 103.53f;
-    mean_vals[1] = 116.28f;
-    mean_vals[2] = 123.675f;
-    norm_vals[0] = 1.0 / 255.0f;
-    norm_vals[1] = 1.0 / 255.0f;
-    norm_vals[2] = 1.0 / 255.0f;
-
-    return 0;
-}
-*/
 int YoloV8::load(int _target_size, std::string _model_path)
 {
     yolo.clear();
 
     yolo.opt = ncnn::Option();
-    // TODO: CHANGE threads number
-    yolo.opt.num_threads = 4;
+    // yolo.opt.num_threads = 4;
     std::string model_path_param = _model_path + std::string(".param");
     std::string model_path_bin = _model_path + std::string(".bin");
     yolo.load_param(model_path_param.c_str());
     yolo.load_model(model_path_bin.c_str());
 
     target_size = _target_size;
-    // TODO: var "mean_vals" no references?deleted
-    /*
-    mean_vals[0] = 103.53f;
-    mean_vals[1] = 116.28f;
-    mean_vals[2] = 123.675f;
-    */
+
     norm_vals[0] = 1.0 / 255.0f;
     norm_vals[1] = 1.0 / 255.0f;
     norm_vals[2] = 1.0 / 255.0f;
 
     return 0;
 }
-
+#ifdef TICKCNT
+int YoloV8::detect(const cv::Mat &rgb, std::vector<Object> &objects, double &time, float prob_threshold, float nms_threshold)
+#else
 int YoloV8::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_threshold, float nms_threshold)
+#endif
 {
+#ifdef TICKCNT
+    int64 start_time = cv::getTickCount();
+#endif
     int width = rgb.cols;
     int height = rgb.rows;
 
@@ -305,7 +253,7 @@ int YoloV8::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_
     int w = width;
     int h = height;
     float scale = 1.f;
-    // TODO: Modify Preprocessing(padding)
+
     if (w > h)
     {
         scale = (float)target_size / w;
@@ -393,7 +341,10 @@ int YoloV8::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_
         }
     } objects_area_greater;
     std::sort(objects.begin(), objects.end(), objects_area_greater);
-
+#ifdef TICKCNT
+    int64 endtime = cv::getTickCount();
+    time += (double)(endtime - start_time) / cv::getTickFrequency();
+#endif
     return 0;
 }
 

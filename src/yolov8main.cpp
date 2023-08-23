@@ -21,6 +21,9 @@ int main(int argc, char **argv)
         return -1;
     }
     std::string type_s(type);
+#ifdef TICKCNT
+    double yolo_time = 0.0;
+#endif
     if (type_s == "img")
     {
         cv::Mat m = cv::imread(filepath, 1);
@@ -37,7 +40,11 @@ int main(int argc, char **argv)
         else
             yolov8.load(target_size);
         std::vector<Object> objects;
-        yolov8.detect(m, objects);                 // recognize the objects
+#ifdef TICKCNT
+        yolov8.detect(m, objects, yolo_time);
+#else
+        yolov8.detect(m, objects);     // recognize the objects
+#endif
         auto filtered = yolov8.filter(objects, 7); // filter labels
         yolov8.draw(m, filtered);                  // draw boxes
 
@@ -82,7 +89,11 @@ int main(int argc, char **argv)
             if (m.empty())
                 break;
             std::vector<Object> objects;
-            yolov8.detect(m, objects);                 // recognize the objects
+#ifdef TICKCNT
+            yolov8.detect(m, objects, yolo_time);
+#else
+            yolov8.detect(m, objects); // recognize the objects
+#endif
             auto filtered = yolov8.filter(objects, 7); // filter labels
             yolov8.draw(m, filtered);                  // show the outcome
             if (fout.is_open())

@@ -7,22 +7,16 @@
 #define MAT_F cv::Mat_<float>
 #define KALMAN_H 2
 #define CNUM 8
-const cv::Scalar colors[] = {
-    cv::Scalar(127, 63, 255, 0.6),
-    cv::Scalar(63, 255, 127, 0.6),
-    cv::Scalar(255, 127, 63, 0.6),
-    cv::Scalar(63, 127, 127, 0.6),
-    cv::Scalar(127, 63, 127, 0.6),
-    cv::Scalar(127, 127, 63, 0.6),
-    cv::Scalar(127, 127, 127, 0.6),
-    cv::Scalar(0, 0, 0, 0.6)};
+#define TICKCNT
+
 class TrackingBox
 {
 public:
     TrackingBox(){};
-    TrackingBox(int frame_, int id_, RECT_F box_) : frame(frame_), id(id_), box(box_){};
+    TrackingBox(int frame_, int id_, int label_, RECT_F box_) : frame(frame_), id(id_), label(label_), box(box_){};
     int frame;
     int id = -1;
+    int label;
     RECT_F box;
 };
 
@@ -49,6 +43,7 @@ class KalmanTracker
 public:
     KalmanTracker();
     KalmanTracker(RECT_F initRect);
+    KalmanTracker(RECT_F initRect, int label_);
     ~KalmanTracker();
     RECT_F predict();
     void update(RECT_F stateMat);
@@ -61,6 +56,7 @@ public:
     int m_hit_streak;
     int m_age;
     int m_id;
+    int label;
 
 private:
     void init_kf(RECT_F stateMat);

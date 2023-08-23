@@ -1,9 +1,9 @@
 #include <fstream>
 #include "../head/utils.h"
 #include "../head/yoloV8.h"
-
+std::string label_names[] = {"person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck"};
 YoloV8 yolov8;
-int target_size = 640; // 416; //320;  must be divisible by 32.
+int target_size = 320; // 416; //640;  must be divisible by 32.
 int main(int argc, char **argv)
 {
     if (argc != 2 && argc != 3)
@@ -42,7 +42,10 @@ int main(int argc, char **argv)
     int cur_frame = 0;
     std::vector<TrackingBox> detFrameData;
     int total_frames_processed = 0;
-    double total_time = 0.0;
+    double sort_time = 0.0, yolo_time = 0.0;
+    std::string outputfile = "../output/" + changeext(filename, "txt");
+    std::ofstream fileclean(outputfile, std::ios_base::out);
+    std::ofstream fout(outputfile, std::ios::app);
     while (true)
     {
         detFrameData.resize(0);
@@ -51,20 +54,24 @@ int main(int argc, char **argv)
         if (m.empty())
             break;
         std::vector<Object> objects;
-        yolov8.detect(m, objects);                 // recognize the objects
+#ifdef TICKCNT
+        yolov8.detect(m, objects, yolo_time); // recognize the objects
+#else
+        yolov8.detect(m, objects);
+#endif
         auto filtered = yolov8.filter(objects, 7); // filter labels
-        // yolov8.draw(m, filtered);                  // show the outcome
         for (auto f : filtered)
-            detFrameData.push_back(TrackingBox(cur_frame, -1, f.rect));
-        auto frameTrackingResult = SORT(detFrameData, total_frames_processed, total_time);
-
-        // videoWriter.write(m.clone()); // save output video under ../output/video/
-        // cv::imshow("result", m);
-        // cv::waitKey(1);
+        {
+            detFrameData.push_back(TrackingBox(cur_frame, -1, f.label, f.rect));
+            // std::cout << f.label << std::endl;
+        }
+        auto frameTrackingResult = SORT(detFrameData, total_frames_processed, sort_time);
         for (auto tb : frameTrackingResult)
         {
-            cv::rectangle(m, tb.box, randColor[tb.id % CNUM], 2, 8, 0);
-            std::string text = getid(tb.id);
+            // std::cout << tb.label << std::endl;
+            cv::rectangle(m, tb.box, randColor[tb.label % CNUM], 2, 8, 0);
+            std::string text = label_names[tb.label] + " " + getid(tb.id);
+            // std::string text = getid(tb.id);
             int baseLine = 0;
             cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.6, 1, &baseLine);
             int x = tb.box.x;
@@ -74,15 +81,20 @@ int main(int argc, char **argv)
             if (x + label_size.width > m.cols)
                 x = m.cols - label_size.width;
             cv::rectangle(m, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-                          randColor[tb.id % CNUM], -1);
+                          randColor[tb.label % CNUM], -1);
             cv::putText(m, text, cv::Point(x, y + label_size.height),
-                        cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 0, 0, 0), 1);
+                        cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(255, 255, 255), 2);
+            fout << cur_frame << " " << tb.box.x << " " << tb.box.y << " " << tb.box.width << " " << tb.box.height << "\n";
         }
         cv::imshow(filename, m);
         videoWriter.write(m.clone());
-        cv::waitKey(20);
+        cv::waitKey(1);
     }
+    fout.close();
     videoWriter.release();
     video.release();
+    std::cout << "total frame processed: " << total_frames_processed << "\n"
+              << "yolo time spent: " << yolo_time << "s\n"
+              << "sort time spent: " << sort_time << "s" << std::endl;
     return 0;
 }
