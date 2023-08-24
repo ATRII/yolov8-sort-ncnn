@@ -217,7 +217,7 @@ static void generate_proposals(std::vector<GridAndStride> grid_strides, const nc
 }
 
 YoloV8::YoloV8() {}
-
+// load model
 int YoloV8::load(int _target_size, std::string _model_path)
 {
     yolo.clear();
@@ -253,7 +253,7 @@ int YoloV8::detect(const cv::Mat &rgb, std::vector<Object> &objects, float prob_
     int w = width;
     int h = height;
     float scale = 1.f;
-
+    // resize
     if (w > h)
     {
         scale = (float)target_size / w;
@@ -382,7 +382,7 @@ int YoloV8::draw(cv::Mat &rgb, const std::vector<Object> &objects)
 
     return 0;
 }
-
+// filter objects via labels
 std::vector<Object> YoloV8::filter(const std::vector<Object> &objects, int labelthreshold)
 {
     std::vector<Object> ans;

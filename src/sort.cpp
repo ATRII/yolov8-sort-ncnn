@@ -4,11 +4,10 @@
 #include <set>
 #include <algorithm>
 #include "../head/utils.h"
-#define CNUM 8
-
+// tracking current frame
 std::vector<TrackingBox> SORT(std::vector<TrackingBox> detCurFrameData, int &total_frames_processed, double &total_time)
 {
-    // 3. update across frames
+    // update across frames
     static int frame_count = 0;
     static int max_age = 1;
     static int min_hits = 3;

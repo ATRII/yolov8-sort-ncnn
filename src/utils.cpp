@@ -1,5 +1,5 @@
 #include "../head/utils.h"
-
+// Calculate IOU
 double GetIOU(RECT_F bb_test, RECT_F bb_gt)
 {
     float in = (bb_test & bb_gt).area();
@@ -498,6 +498,7 @@ RECT_F KalmanTracker::get_rect_xysr(float cx, float cy, float s, float r)
 
     return RECT_F(x, y, w, h);
 }
+// Get id string for display
 std::string getid(int id)
 {
     std::string s = "0000";

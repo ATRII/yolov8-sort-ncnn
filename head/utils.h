@@ -6,8 +6,8 @@
 #define RECT_F cv::Rect_<float>
 #define MAT_F cv::Mat_<float>
 #define KALMAN_H 2
-#define CNUM 8
-#define TICKCNT
+#define CNUM 8  // label types
+#define TICKCNT // cnt time or not
 
 class TrackingBox
 {
